@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="shortcut icon" href="../imagenes/logo/logo.png" type="image/x-icon">
+  <title>Detalle de producto</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <!-- Iconos (opcional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Tus estilos -->
+  <link rel="stylesheet" href="../css/estilos.css">
+  <script type="module" src="../js/index.js"></script>
+</head>
+<body>
+  <section>
+    <!-- ======== TOP BAR (negra) ======== -->
+    <div class="topbar py-2">
+      <div class="container">
+        <div class="topbar-grid align-items-center">
+          <!-- Logo -->
+          <a class="brand d-flex align-items-center" style="text-decoration:none;" href="../index.html">
+            <img src="../imagenes/logo/logo.png" alt="Video juegos">
+            <span style="color: white;">VIDEO GAMES</span>
+          </a>
+        
+          <!-- Buscador -->
+          <form class="search-wrap d-flex" role="search" autocomplete="off">
+            <input class="form-control form-control-lg me-2" type="search" placeholder="Buscar productos ..." aria-label="Buscar">
+            <button class="btn btn-lg" type="submit" aria-label="Buscar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </form>
+
+          <!-- Redes -->
+          <div class="social d-flex justify-content-end">
+            <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/login" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.youtube.com/" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== MENÚ (rojo logo) ======== -->
+    <nav class="navbar navbar-expand-lg menubar">
+      <div class="container">
+        <a class="navbar-brand d-lg-none fw-bold text-white" href="#">MENÚ</a>
+
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu"
+          aria-controls="mainMenu" aria-expanded="false" aria-label="Alternar navegación">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainMenu">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="../index.html">INICIO</a></li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">JUEGOS PS3</a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" href="#">Todos los juegos PS3</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">JUEGOS PS4</a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" href="#">Todos los juegos PS4</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">JUEGOS PS5</a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" href="#">Todos los juegos PS5</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">JUEGOS NINTENDO</a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" href="#">Nintendo SWITCH</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">JUEGOS PC</a>
+              <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" href="#">Todos los juegos PC</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          <!-- Carrito -->
+          <div class="d-flex align-items-center gap-2">
+            <button  id="cartOpen" class="btn btn-cart">
+              CARRITO <i class="fa-solid fa-cart-shopping"></i>
+              <span class="badge rounded-pill ms-1" id="cartCount">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </section>
+
+<main id="producto" class="py-4">
+  <div class="container">
+    <!-- Migas -->
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="../index.html">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="#" data-bc-plataforma>Plataforma</a></li>
+       
+      </ol>
+    </nav>
+
+    <div class="row g-4">
+      <!-- Imagen principal -->
+      <div class="col-12 col-lg-4">
+        <div class="ratio ratio-3x4 border rounded overflow-hidden">
+          <img data-image src="" alt="" class="w-100 h-100 object-fit-cover object-position-top">
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="col-12 col-lg-7">
+        <h1 class="h3 mb-2" data-title>—</h1>
+
+        <div class="d-flex align-items-baseline gap-3 mb-3">
+          <span class="display-6 fw-bold" data-price>—</span>
+          <del class="text-muted" data-price-list></del>
+        </div>
+
+        <dl class="row small">
+          <dt class="col-5 col-md-4">Voces</dt>
+          <dd class="col-7 col-md-8" data-voces>—</dd>
+
+          <dt class="col-5 col-md-4">Textos</dt>
+          <dd class="col-7 col-md-8" data-textos>—</dd>
+
+          <dt class="col-5 col-md-4">Peso del juego</dt>
+          <dd class="col-7 col-md-8"><span data-peso>—</span> GB</dd>
+
+          <dt class="col-5 col-md-4">Requerido en consola</dt>
+          <dd class="col-7 col-md-8"><span data-requerido>—</span> GB</dd>
+
+          <dt class="col-5 col-md-4">Instalación</dt>
+          <dd class="col-7 col-md-8" data-instrucciones>—</dd>
+        </dl>
+
+        <!-- Variantes -->
+        <div class="mb-3">
+          <div class="btn-group" role="group" aria-label="Variantes" data-variantes></div>
+        </div>
+
+        <!-- Cantidad + Carrito -->
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="input-group" style="width:120px;">
+            <button class="btn btn-outline-secondary" type="button" data-qty-decr>-</button>
+            <input class="form-control text-center" type="number" min="1" value="1" data-qty>
+            <button class="btn btn-outline-secondary" type="button" data-qty-incr>+</button>
+          </div>
+          <button class="btn btn-success btn-lg" data-add-cart>
+            <i class="fa-solid fa-cart-plus me-1"></i> AÑADIR AL CARRITO
+          </button>
+        </div>
+
+        <div class="small text-muted">SKU: <span data-sku>N/D</span></div>
+        <div class="small">Categorías: <span data-categorias>—</span></div>
+        <div class="small">Tags: <span data-tags>—</span></div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Descripción -->
+    <h3 class="h5">Descripción</h3>
+    <p data-descripcion class="mb-4">—</p>
+
+    <!-- Relacionados -->
+    <h3 class="h5">Productos relacionados</h3>
+    <div class="d-flex flex-nowrap gap-3 overflow-auto py-2" data-related-track></div>
+  </div>
+  <!-- VISTOS RECIENTEMENTE -->
+    <section class="py-5">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 m-0">Vistos recientemente</h2>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" id="recClear">Limpiar</button>
+            <button class="btn btn-sm btn-outline-secondary" id="recToggle">Pausar</button>
+          </div>
+        </div>
+        <div class="recent-grid" data-recent-list></div>
+      </div>
+    </section>
+
+</main>
+  <!-- FOOTER -->
+<footer class="site-footer text-light pt-5">
+  <div class="container">
+    <div class="row gy-5">
+      <!-- Col 1: Marca + info -->
+      <div class="col-12 col-lg-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <img src="../imagenes/logo/logo.png" alt="Gamer Perú" class="footer-logo">
+          <h3 class="m-0 fw-bold">VIDEO GAMES <small class="d-block fw-normal"></small></h3>
+        </div>
+
+        <p class="mb-2">
+          Tienda Especializada en Videojuegos Digitales.<br>
+          Lo mejor en Juegos PS4 PS5 Nintendo Switch!<br>
+          Solicita tu catálogo PlayStation 4, PlayStation 5 ¡ahora!
+        </p>
+
+        <p class="mb-0 fw-bold">Horarios</p>
+        <p class="mb-0">
+          L - S de 9am a 8pm · Feriados Horario Normal<br>
+          Los pedidos del Domingo se envían el día Lunes
+        </p>
+      </div>
+
+      <!-- Col 2: Enlaces de interés -->
+      <div class="col-6 col-lg-3">
+        <h5 class="footer-title">ENLACES DE INTERÉS</h5>
+        <span class="footer-hr"></span>
+        <ul class="list-unstyled footer-links">
+          <li><a href="#">Medios de pago</a></li>
+          <li><a href="#">Preguntas frecuentes</a></li>
+          <li><a href="#">Términos y condiciones</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Categorías -->
+      <div class="col-6 col-lg-3">
+        <h5 class="footer-title">CATEGORÍAS</h5>
+        <span class="footer-hr"></span>
+        <ul class="list-unstyled footer-links">
+          <li><a href="#">Juegos digitales PS4</a></li>
+          <li><a href="#">Juegos digitales PS5</a></li>
+          <li><a href="#">Juegos digitales PS3</a></li>
+          <li><a href="#">Juegos digitales PC</a></li>
+          <li><a href="#">Juegos digitales Nintendo</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Síguenos -->
+      <div class="col-12 col-lg-2">
+        <h5 class="footer-title">SÍGUENOS</h5>
+        <span class="footer-hr"></span>
+        <p class="mb-2">Síguenos en nuestras redes sociales..</p>
+        <div class="d-flex align-items-center gap-3 fs-5 footer-social">
+            <a href="https://www.facebook.com/" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/login" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.youtube.com/" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider + bottom -->
+    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3">
+      <small class="text-white">
+        Venta de Video Juegos 2025 © <strong>Todos los derechos reservados</strong>
+      </small>
+
+      <div class="d-flex align-items-center gap-2">
+        <span class="pay-badge" aria-label="Visa"><i class="fab fa-cc-visa"></i></span>
+        <span class="pay-badge" aria-label="PayPal"><i class="fab fa-cc-paypal"></i></span>
+        <span class="pay-badge" aria-label="Mastercard"><i class="fab fa-cc-mastercard"></i></span>
+        <span class="pay-badge" aria-label="Bitcoin"><i class="fab fa-bitcoin"></i></span>
+      </div>
+    </div>
+  </div>
+</footer>
+// CARRITO (overlay + drawer)
+<section>
+    <div id="cartOverlay" class="cart-overlay"></div>
+<aside id="cartDrawer" class="cart-drawer">
+  <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+    <h5 class="m-0">CARRITO</h5>
+    <button id="cartClose" class="btn btn-link fs-4">✕</button>
+  </div>
+
+  <div class="p-3" data-cart-empty>
+    <p class="text-center text-muted my-5">No hay productos en el carrito.</p>
+  </div>
+
+  <div class="p-3 d-none" data-cart-full>
+    <div data-cart-list></div>
+    <hr>
+    <div class="d-flex justify-content-between fw-semibold mb-3">
+      <span>Subtotal:</span> <span data-cart-subtotal>S/ 0.00</span>
+    </div>
+    <div class="d-grid gap-2">
+      <a href="/paginas/carrito.html" target="_blank" class="btn btn-warning">VER CARRITO</a>
+      <a href="/paginas/checkout.html" target="_blank" class="btn btn-success">FINALIZAR COMPRA</a>
+    </div>
+  </div>
+</aside>
+</section>
+<script type="module">
+  import { bindAddToCart, bindCartFrame } from "../js/lib/cart.js";
+  bindCartFrame();
+  bindAddToCart();
+</script>
+
+<!-- Botón WhatsApp flotante -->
+<a href="https://wa.me/51999999999?text=Hola,%20quiero%20información%20sobre%20un%20juego"
+   class="whatsapp-float" target="_blank" rel="noopener" aria-label="Abrir WhatsApp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Lógica de la ficha (leerá ?slug= y usará js/data/catalogo.js) -->
+<script type="module" src="../js/producto.js"></script>
+
+</body>
+</html>
