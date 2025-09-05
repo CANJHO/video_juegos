@@ -74,14 +74,14 @@ function initCarousel(root) {
 const fmt = new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"});
 
 // Imagen: usa p.img si viene; si no, ruta por convención relativa a index.html
-const getImgSrc = (p) => p.img ?? `./imagenes/index/${p.plataforma}/${p.slug}.webp`;
+const getImgSrc = (p) => p.img ?? `../imagenes/index/${p.plataforma}/${p.slug}.webp`;
 
 // URL detalle con SLUG + PLATAFORMA de la sección (no del producto)
 const getHrefWithPlat = (p, plataforma) => {
   const qs = new URLSearchParams();
   qs.set("slug", p.slug);
   qs.set("plataforma", String(p.plataforma || plataforma).toLowerCase());
-  return `paginas/producto.html?${qs.toString()}`;
+  return `../paginas/producto.html?${qs.toString()}`;
 };
 
 // Nota: ponemos .ratio DENTRO del <a> para que el ::before no tape el click
