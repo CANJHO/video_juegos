@@ -1,6 +1,6 @@
 // /js/producto.js
-import { CATALOGO } from "/js/data/catalogo.js";
-import { addVisto }   from "/js/lib/vistos.js";
+import { CATALOGO } from "./data/catalogo.js";
+import { addVisto }   from "./lib/vistos.js";
 
 (() => {
   // -------- utils

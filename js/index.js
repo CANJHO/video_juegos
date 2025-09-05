@@ -1,6 +1,6 @@
 // /js/index.js
-import { CATALOGO } from "/js/data/catalogo.js";
-import { addVisto, getVistos, setVistos, getPause, setPause } from "/js/lib/vistos.js";
+import { CATALOGO } from "./data/catalogo.js";
+import { addVisto, getVistos, setVistos, getPause, setPause } from "./lib/vistos.js";
 
 /* =========================== BUSCADOR =========================== */
 (function setupSearch() {
