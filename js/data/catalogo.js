@@ -1,4 +1,4 @@
-//catalo para la descripcion de los productos
+//catalo para la descripcion de los productos los nombres estan para corregir
 export const CATALOGO = [
   { slug: 'black-myth-wukong', plataforma: 'pc', titulo: "Black Myth Wukong", precio: 79.90, precio_lista: null, moneda: 'PEN', voces: "Español", textos: "Español", peso_gb: 7, requerido_gb: 10.5, instrucciones: "1 Consola", variantes: ["PRINCIPAL", "SECUNDARIA"], categorias: ["JUEGOS DIGITALES PC"], tags: ["accion", "soulslike"], related_slugs: [], descripcion: "Videojuego digital para PC. Entrega inmediata." },
   { slug: 'dragon-ball-sparking-zero', plataforma: 'pc', titulo: "Dragon Ball Sparking Zero", precio: 79.90, precio_lista: null, moneda: 'PEN', voces: "Español", textos: "Español", peso_gb: 28, requerido_gb: 42.0, instrucciones: "1 Consola", variantes: ["PRINCIPAL", "SECUNDARIA"], categorias: ["JUEGOS DIGITALES PC"], tags: ["lucha", "anime"], related_slugs: [], descripcion: "Videojuego digital para PC. Entrega inmediata." },
