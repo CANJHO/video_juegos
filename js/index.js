@@ -1,36 +1,32 @@
 // /js/index.js
-import { CATALOGO } from "/js/data/catalogo.js";
-import { addVisto, getVistos, setVistos, getPause, setPause } from "/js/lib/vistos.js";
+import { getVistos, setVistos, getPause, setPause } from "./lib/vistos.js";
 
-/* =========================== BUSCADOR =========================== */
-(function setupSearch() {
-  const form = document.querySelector(".search-wrap");
-  if (!form) return;
-  const input = form.querySelector('input[type="search"]');
+/* =============== CONFIG =============== */
+const MAX_HOME = 10; // máximo por sección
+const DESTACADOS = { ps4:[], switch:[], ps5:[], ps3:[], pc:[] };
 
-  const applyFilter = (q) => {
-    const query = (q || "").trim().toLowerCase();
-    const cards = document.querySelectorAll("[data-carousel-track] .card");
-    if (!query) { cards.forEach(c => c.classList.remove("d-none")); return; }
-    let first = null;
-    cards.forEach(card => {
-      const title = card.querySelector("h3")?.textContent.toLowerCase() || "";
-      const ok = title.includes(query);
-      card.classList.toggle("d-none", !ok);
-      if (ok && !first) first = card;
-    });
-    if (first) {
-      const vp = first.closest("[data-carousel-viewport]");
-      vp?.scrollTo({ left: first.offsetLeft, behavior: "smooth" });
-    }
-  };
+/* =============== HELPERS =============== */
+const money = (n=0) => new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"}).format(+n||0);
 
-  form.addEventListener("submit", e => { e.preventDefault(); applyFilter(input.value); });
-  input.addEventListener("input",  () => { if (input.value.trim()==="") applyFilter(""); });
-  input.addEventListener("keydown",(e)=> { if (e.key==="Escape"){ input.value=""; applyFilter(""); }});
-})();
+// Rutas válidas en / y en /paginas/ (GitHub Pages)
+const ROOT = location.pathname.includes("/paginas/") ? ".." : ".";
+const imgFrom = (p) => `${ROOT}/imagenes/index/${String(p.plataforma).toLowerCase()}/${p.slug}.webp`;
 
-/* =================== CARRUSEL (drag solo TOUCH) =================== */
+// URL de detalle canónica
+const hrefProducto = (p) => {
+  const qs = new URLSearchParams({ slug: p.slug, plataforma: String(p.plataforma).toLowerCase() });
+  return `${ROOT}/paginas/producto.html?${qs.toString()}`;
+};
+
+// Catálogo (JSON)
+async function cargarCatalogo(){
+  const url = `${ROOT}/js/data/catalogo.json`;
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error("No se pudo cargar catálogo");
+  return await r.json();
+}
+
+/* =============== CARRUSEL =============== */
 function initCarousel(root) {
   const viewport = root.querySelector("[data-carousel-viewport]");
   const track    = root.querySelector("[data-carousel-track]");
@@ -38,151 +34,160 @@ function initCarousel(root) {
   const next     = root.querySelector("[data-carousel-next]");
   if (!viewport || !track) return;
 
-  const gap = () => parseFloat(getComputedStyle(track).gap || 0) || 0;
-  const step = () => {
-    const card = track.querySelector(".card");
-    const w = card ? card.getBoundingClientRect().width : 260;
-    return w + gap();
-  };
+  const gap  = () => parseFloat(getComputedStyle(track).gap || 0) || 0;
+  const step = () => (track.querySelector(".card")?.getBoundingClientRect().width || 260) + gap();
 
   prev?.addEventListener("click", e => { e.preventDefault(); viewport.scrollBy({ left: -step()*2, behavior: "smooth" }); });
   next?.addEventListener("click", e => { e.preventDefault(); viewport.scrollBy({ left:  step()*2, behavior: "smooth" }); });
 
-  // Drag sólo para pantallas táctiles
+  // drag táctil
   let down=false, startX=0, startScroll=0;
-  viewport.addEventListener("pointerdown", (e)=>{
-    if (e.pointerType !== "touch") return;
-    down = true; startX = e.clientX; startScroll = viewport.scrollLeft;
-    viewport.setPointerCapture(e.pointerId);
-  });
-  viewport.addEventListener("pointermove", (e)=>{
-    if (!down) return;
-    viewport.scrollLeft = startScroll - (e.clientX - startX);
-  });
-  ["pointerup","pointerleave"].forEach(ev => viewport.addEventListener(ev, ()=>{ down=false; }));
+  viewport.addEventListener("pointerdown", (e)=>{ if(e.pointerType!=="touch")return;
+    down=true; startX=e.clientX; startScroll=viewport.scrollLeft; viewport.setPointerCapture(e.pointerId); });
+  viewport.addEventListener("pointermove", (e)=>{ if(!down)return; viewport.scrollLeft = startScroll - (e.clientX-startX); });
+  ["pointerup","pointerleave"].forEach(ev=>viewport.addEventListener(ev,()=>{down=false;}));
 
-  // Defensa: asegura navegación del <a> en escritorio
+  // asegura navegación en desktop
   track.addEventListener("click", (e)=>{
     const a = e.target.closest("a[href]");
     if (!a) return;
-    if (e.ctrlKey || e.metaKey || e.button===1) return; // permitir nueva pestaña
+    if (e.ctrlKey || e.metaKey || e.button===1) return;
     window.location.href = a.href;
   });
 }
 
-/* =========================== RENDER CARDS =========================== */
-const fmt = new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"});
-
-// Imagen: usa p.img si viene; si no, ruta por convención relativa a index.html
-const getImgSrc = (p) => p.img ?? `./imagenes/index/${p.plataforma}/${p.slug}.webp`;
-
-// URL detalle con SLUG + PLATAFORMA de la sección (no del producto)
-const getHrefWithPlat = (p, plataforma) => {
-  const qs = new URLSearchParams();
-  qs.set("slug", p.slug);
-  qs.set("plataforma", String(p.plataforma || plataforma).toLowerCase());
-  return `../paginas/producto.html?${qs.toString()}`;
-};
-
-// Nota: ponemos .ratio DENTRO del <a> para que el ::before no tape el click
-const cardTemplate = (p, plataforma) => `
+/* =============== RENDER CARDS =============== */
+const card = (p) => `
   <article class="card border-0 shadow-sm" style="min-width:220px;max-width:260px;">
-    <a href="${getHrefWithPlat(p, plataforma)}" class="d-block" target="_self" rel="noopener">
+    <a href="${hrefProducto(p)}" class="d-block" target="_self" rel="noopener">
       <div class="ratio ratio-3x4">
-        <img src="${getImgSrc(p)}" draggable="false"
-             class="w-100 h-100 object-fit-cover object-position-top rounded-top"
-             alt="${p.titulo}">
+        <img src="${imgFrom(p)}" class="w-100 h-100 object-fit-cover object-position-top rounded-top" alt="${p.titulo}" loading="lazy">
       </div>
     </a>
     <div class="card-body text-center">
       <h3 class="h6 mb-2">
-        <a href="${getHrefWithPlat(p, plataforma)}" class="text-decoration-none" target="_self" rel="noopener">
-          ${p.titulo}
-        </a>
+        <a href="${hrefProducto(p)}" class="text-decoration-none" target="_self" rel="noopener">${p.titulo}</a>
       </h3>
-      <p class="mb-0 fw-semibold">${fmt.format(Number(p.precio || 0))}</p>
+      <p class="mb-0 fw-semibold">${money(p.precio)}</p>
     </div>
   </article>
 `;
 
-function renderFeeds(){
-  document.querySelectorAll("[data-carousel-track]").forEach(track=>{
-    // plataforma tomada del HTML: data-feed o id de la sección
-    const plataforma = (track.dataset.feed || track.closest("section")?.id || "").toLowerCase();
-
-    // Filtra por plataforma (asegúrate que p.plataforma exista en CATALOGO)
-    const items = CATALOGO.filter(p => (p.plataforma || "").toLowerCase() === plataforma);
-
-    // Render
-    track.innerHTML = items.map(p => cardTemplate(p, plataforma)).join("");
-  });
-}
-
-/* =================== VISTOS RECIENTES (con limpiar/pausar) =================== */
+/* =============== VISTOS RECIENTES =============== */
 function renderRecientes(){
   const cont = document.querySelector("[data-recent-list]");
   if (!cont) return;
 
-  const vistos = getVistos();
+  // reconstruye imagen si algún registro viejo no la tiene
+  const imgFromHref = (href) => {
+    try {
+      const u = new URL(href, location.origin);
+      const sp = new URLSearchParams(u.search);
+      const plat = (sp.get("plataforma") || "").toLowerCase();
+      const slug = sp.get("slug") || "";
+      return (plat && slug) ? `${ROOT}/imagenes/index/${plat}/${slug}.webp` : "";
+    } catch { return ""; }
+  };
 
-  if (!vistos.length) {
+  const vistos = getVistos();
+  if (!vistos.length){
     cont.className = "recent-grid";
     cont.innerHTML = `<span class="text-muted">Aún no tienes vistos.</span>`;
-    updateRecButtons();
-    return;
+    updateRecButtons(); return;
   }
 
   cont.className = "recent-grid";
-  cont.innerHTML = vistos.map(v => `
-    <a href="${v.href}" class="text-decoration-none">
-      <div class="recent-card">
-        <img src="${v.img}" alt="${v.title}">
-        <div>
-          <div class="recent-title">${v.title}</div>
-          <div class="recent-date">${new Date(v.ts).toLocaleDateString()}</div>
+  cont.innerHTML = vistos.map(v => {
+    const img = v.img && v.img.trim() ? v.img : imgFromHref(v.href);
+    return `
+      <a href="${v.href}" class="text-decoration-none">
+        <div class="recent-card">
+          <img src="${img}" alt="${v.title}">
+          <div>
+            <div class="recent-title">${v.title}</div>
+            <div class="recent-date">${new Date(v.ts).toLocaleDateString()}</div>
+          </div>
         </div>
-      </div>
-    </a>
-  `).join("");
+      </a>`;
+  }).join("");
 
   updateRecButtons();
 }
-
 function updateRecButtons(){
   const btnClear = document.getElementById("recClear");
   const btnToggle = document.getElementById("recToggle");
-  if (btnClear){
-    btnClear.disabled = getVistos().length === 0;
-    btnClear.onclick = () => { setVistos([]); renderRecientes(); };
-  }
-  if (btnToggle){
-    const paused = getPause();
-    btnToggle.textContent = paused ? "Reanudar" : "Pausar";
-    btnToggle.onclick = () => { setPause(!getPause()); updateRecButtons(); };
-  }
+  if (btnClear){ btnClear.disabled = getVistos().length===0; btnClear.onclick = ()=>{ setVistos([]); renderRecientes(); }; }
+  if (btnToggle){ const paused = getPause(); btnToggle.textContent = paused?"Reanudar":"Pausar"; btnToggle.onclick = ()=>{ setPause(!getPause()); updateRecButtons(); }; }
 }
 
-// Guardar “vistos” al click en una card (si no está pausado)
-document.body.addEventListener("click", (e) => {
-  const a = e.target.closest("[data-carousel-track] a[href]");
-  if (!a) return;
+/* =========================== BUSCADOR (redirige a tienda) =========================== */
+(function setupSearch() {
+  const form = document.querySelector(".search-wrap");
+  if (!form) return;
+  const input = form.querySelector('input[type="search"]');
 
-  const card = a.closest(".card");
-  const img  = card?.querySelector("img");
-  addVisto({
-    href: a.getAttribute("href"),
-    title: card?.querySelector("h3")?.innerText?.trim() || img?.alt || "Producto",
-    img: img?.src || "",
+  // Si estamos en tienda, tienda.js maneja el filtrado.
+  const enTienda = location.pathname.includes("/paginas/tienda.html");
+  if (enTienda) return;
+
+  // En cualquier otra página → redirigir a tienda.html?q=...
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const base = location.pathname.includes("/paginas/") ? ".." : ".";
+    const q = (input.value || "").trim();
+    const url = `${base}/paginas/tienda.html${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+    form.reset();                // <-- limpia el campo antes de navegar
+    location.href = url;
   });
-  // no hacemos preventDefault, dejamos navegar
-});
 
-/* =========================== Boot =========================== */
-renderFeeds();
-document.querySelectorAll("[data-carousel]").forEach(initCarousel);
-renderRecientes();
+  // Al volver con Atrás desde tienda, vacía el input restaurado por bfcache
+  window.addEventListener("pageshow", () => { if (input) input.value = ""; });
+})();
 
-// contador carrito opcional
-const cartCountEl = document.getElementById("cartCount");
-const cartCount = parseInt(localStorage.getItem("cartCount") || "0", 10);
-if (cartCountEl && !Number.isNaN(cartCount)) cartCountEl.textContent = cartCount;
+/* =============== BOOT =============== */
+(async function boot(){
+  try{
+    const catalogo = await cargarCatalogo();
+
+    // Render por cada sección [data-feed]
+    document.querySelectorAll("[data-carousel-track]").forEach(track=>{
+      const plat = (track.dataset.feed || track.closest("section")?.id || "").toLowerCase();
+
+      const picks = (DESTACADOS[plat] && DESTACADOS[plat].length)
+        ? DESTACADOS[plat]
+            .map(ref => catalogo.find(p => p.slug===ref.slug && String(p.plataforma).toLowerCase()===ref.plataforma))
+            .filter(Boolean)
+        : catalogo.filter(p => String(p.plataforma).toLowerCase()===plat);
+
+      track.innerHTML = picks.slice(0, MAX_HOME).map(card).join("");
+    });
+
+    // Carruseles y recientes
+    document.querySelectorAll("[data-carousel]").forEach(initCarousel);
+    renderRecientes();
+
+    // Guardar “vistos” al click en cards (de-dup por href)
+    document.body.addEventListener("click", (e) => {
+      const a = e.target.closest("[data-carousel-track] a[href]");
+      if (!a) return;
+
+      const cardEl = a.closest(".card");
+      const imgEl  = cardEl?.querySelector("img");
+
+      const u = new URL(a.href, location.origin);
+      const href = u.pathname + u.search;
+
+      const title = cardEl?.querySelector("h3")?.innerText?.trim() || imgEl?.alt || "Producto";
+      const img   = imgEl?.currentSrc || imgEl?.src || "";
+
+      const list = getVistos().filter(v => v.href !== href);
+      list.unshift({ href, title, img, ts: Date.now() });
+      setVistos(list.slice(0, 30));
+      renderRecientes();
+    });
+
+  } catch(err){
+    console.error(err);
+    alert("No se pudo cargar el catálogo.");
+  }
+})();

@@ -1,95 +1,126 @@
 // /js/producto.js
-import { CATALOGO } from "/js/data/catalogo.js";
-import { addVisto }   from "/js/lib/vistos.js";
+import { getVistos, setVistos } from "./lib/vistos.js";
 
 (() => {
-  // -------- utils
-  const qs  = (s, r = document) => r.querySelector(s);
-  const money = (n = 0) =>
-    new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", maximumFractionDigits: 2 }).format(+n || 0);
+  const qs = (s, r=document) => r.querySelector(s);
+  const money = (n=0) =>
+    new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN",maximumFractionDigits:2}).format(+n||0);
 
-  const slugify = (s="") => s.toLowerCase().normalize("NFD")
-    .replace(/\p{Diacritic}/gu,"").replace(/[^\w]+/g,"-").replace(/^-+|-+$/g,"");
+  const ROOT = location.pathname.includes("/paginas/") ? ".." : ".";
+  const slugify = (s="") => String(s).toLowerCase()
+    .normalize("NFD").replace(/\p{Diacritic}/gu,"")
+    .replace(/[^\w-]+/g,"-").replace(/^-+|-+$/g,"");
 
-  // lee parámetros (?slug=...&plataforma=...)
-  const sp = new URLSearchParams(location.search);
-  const slugParam = (sp.get("slug") || "").trim().toLowerCase();
-  const platParam = (sp.get("plataforma") || "").trim().toLowerCase();
+  const imgFrom = (p) =>
+    `${ROOT}/imagenes/index/${String(p.plataforma||"").toLowerCase()}/${p.slug}.webp`;
 
-  // -------- búsqueda en catálogo
-  const findBySlugPlat = (slug, plat) =>
-    CATALOGO.find(p =>
-      slugify(p.slug || p.titulo || p.nombre || "") === slug &&
-      String(p.plataforma || "").toLowerCase() === plat
-    );
-
-  const findBySlug = (slug) =>
-    CATALOGO.find(p => slugify(p.slug || p.titulo || p.nombre || "") === slug);
-
-  // rutas de imagen (desde /paginas/producto.html)
-  const getImg = (p) => p.imagen || p.img || p.poster ||
-    `../imagenes/index/${p.plataforma}/${p.slug}.webp`;
-
-  // genera URL a otra ficha (relacionados)
   const detalleURL = (p) => {
-    const qs = new URLSearchParams();
-    qs.set("slug", p.slug || slugify(p.titulo || p.nombre || ""));
-    qs.set("plataforma", String(p.plataforma || "").toLowerCase());
-    return `producto.html?${qs.toString()}`;
+    const q = new URLSearchParams({ slug: p.slug, plataforma: String(p.plataforma||"").toLowerCase() });
+    return `producto.html?${q.toString()}`;
   };
 
-  // -------- render ficha
-  function renderProduct(p) {
-    // Migas / encabezados
-    setText("[data-bc-plataforma]", p.plataforma || p.categoria || "Catálogo");
-    setText("[data-title]", p.titulo || p.nombre || "Producto");
-    document.title = `${p.titulo || p.nombre} | Tienda`;
+  async function cargarCatalogo(){
+    const jsonUrl = `${ROOT}/js/data/catalogo.json`;
+    try {
+      const r = await fetch(jsonUrl, { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const txt = await r.text();
+      return JSON.parse(txt);
+    } catch {
+      const jsUrl = `${ROOT}/js/data/catalogo.js`;
+      const mod   = await import(jsUrl);
+      if (!mod?.CATALOGO) throw new Error("No se encontró CATALOGO en catalogo.js");
+      return mod.CATALOGO;
+    }
+  }
 
-    // Precios
-    setText("[data-price]",      money(p.precio || p.price));
-    if (p.precio_lista || p.price_list) {
-      setText("[data-price-list]", money(p.precio_lista || p.price_list));
+  // Guarda “vistos” sin duplicar (clave = href)
+  function saveVisto(entry){
+    const list = getVistos().filter(v => v.href !== entry.href);
+    list.unshift({ ...entry, ts: Date.now() });
+    setVistos(list.slice(0, 30));
+  }
+
+  const setText = (sel, val) => { const el = qs(sel); if (el) el.textContent = (val ?? "—"); };
+
+  function renderProduct(p, catalogo){
+    setText("[data-bc-plataforma]", p.plataforma || "Catálogo");
+    setText("[data-title]", p.titulo || p.nombre || "Producto");
+    document.title = `${p.titulo || p.nombre || "Producto"} | Tienda`;
+
+    setText("[data-price]", money(p.precio || p.price || 0));
+    const listEl = qs("[data-price-list]");
+    if (listEl){
+      const hasList = (p.precio_lista ?? p.price_list) != null;
+      if (hasList){
+        listEl.textContent = money(p.precio_lista ?? p.price_list);
+        listEl.classList.remove("d-none");
+      } else {
+        listEl.classList.add("d-none");
+      }
     }
 
-    // Info técnica
     setText("[data-voces]",         p.voces || "—");
     setText("[data-textos]",        p.textos || "—");
     setText("[data-peso]",          p.peso || p.peso_gb || "—");
     setText("[data-requerido]",     p.requerido || p.requerido_gb || "—");
     setText("[data-instrucciones]", p.instrucciones || "—");
-    setText("[data-sku]",           p.sku || "N/D");
-    setText("[data-categorias]",    p.categorias || p.categoria || "—");
-    setText("[data-tags]",          p.tags || "—");
+    setText("[data-sku]",           p.sku || p.slug || "N/D");
+    setText("[data-categorias]",    Array.isArray(p.categorias) ? p.categorias.join(", ") : (p.categorias || "—"));
+    setText("[data-tags]",          Array.isArray(p.tags) ? p.tags.join(", ") : (p.tags || "—"));
 
-    // Imagen principal
-    const imgEl = qs("[data-image]");
-    if (imgEl) { imgEl.src = getImg(p); imgEl.alt = p.titulo || p.nombre || "Producto"; }
+    // Enlazar el nombre de la plataforma al listado de esa plataforma
+    const platLink = document.querySelector('[data-bc-plataforma]');
+    if (platLink) {
+      const plat = String(p.plataforma || '').toLowerCase();
 
-    // Variantes (si hay)
-    const varBox = qs("[data-variantes]");
-    if (varBox && Array.isArray(p.variantes) && p.variantes.length) {
-      varBox.innerHTML = p.variantes
-        .map((v, i) => `<button class="btn btn-outline-primary ${i === 0 ? "active" : ""}" data-variant="${v}">${v}</button>`)
-        .join("");
+      // (Opcional) cómo quieres mostrar el texto
+      platLink.textContent = plat.toUpperCase(); // PS5, PS4, SWITCH, etc.
+
+      // Ruta correcta tanto si estás dentro de /paginas/ como en la raíz
+      const href = location.pathname.includes('/paginas/')
+        ? `${plat}.html`          // producto.html -> ps5.html (mismo directorio)
+        : `./paginas/${plat}.html`; // por si algún día mueves la ficha fuera
+
+      platLink.setAttribute('href', href);
     }
 
-    // Descripción
+
+    const imgEl = qs("[data-image]");
+    if (imgEl){
+      imgEl.src = imgFrom(p);
+      imgEl.alt = p.titulo || p.nombre || "Producto";
+      imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = `${ROOT}/imagenes/placeholder.webp`; };
+    }
+
+    const varBox = qs("[data-variantes]");
+    if (varBox){
+      const vars = Array.isArray(p.variantes) ? p.variantes : [];
+      varBox.innerHTML = vars.map((v,i)=>
+        `<button class="btn btn-outline-primary ${i===0?"active":""}" data-variant="${v}">${v}</button>`
+      ).join("");
+    }
+
     setText("[data-descripcion]", p.descripcion || p.description || "—");
 
-    // Relacionados (misma plataforma, distinto slug)
     const rel = qs("[data-related-track]");
-    if (rel) {
-      const related = CATALOGO
+    if (rel){
+      const related = catalogo
         .filter(x =>
           slugify(x.slug || x.titulo || x.nombre || "") !== slugify(p.slug || p.titulo || p.nombre || "") &&
-          String(x.plataforma || "").toLowerCase() === String(p.plataforma || "").toLowerCase()
+          String(x.plataforma||"").toLowerCase() === String(p.plataforma||"").toLowerCase()
         )
         .slice(0, 10);
 
       rel.innerHTML = related.map(x => `
         <a class="text-decoration-none" href="${detalleURL(x)}">
-          <div class="card" style="width:160px">
-            <img src="${getImg(x)}" class="card-img-top" alt="${x.titulo || x.nombre}">
+          <div class="card border-0 shadow-sm" style="width:160px">
+            <div class="ratio ratio-3x4">
+              <img src="${imgFrom(x)}"
+                   class="w-100 h-100 object-fit-cover object-position-top rounded-top"
+                   alt="${x.titulo || x.nombre}"
+                   onerror="this.onerror=null;this.src='${ROOT}/imagenes/placeholder.webp'">
+            </div>
             <div class="card-body p-2 text-center">
               <div class="small fw-semibold">${x.titulo || x.nombre}</div>
               <div class="small text-muted">${money(x.precio || x.price || 0)}</div>
@@ -100,70 +131,77 @@ import { addVisto }   from "/js/lib/vistos.js";
     }
   }
 
-  // helpers de UI
-  function setText(sel, val) { const el = qs(sel); if (el) el.textContent = val; }
-
-  function bindQtyCart() {
+  function bindQtyCart(prod){
     const input = qs("[data-qty]");
-    qs("[data-qty-incr]")?.addEventListener("click", () => {
-      input.value = String(Math.min(99, (parseInt(input.value || "1", 10) || 1) + 1));
-    });
-    qs("[data-qty-decr]")?.addEventListener("click", () => {
-      input.value = String(Math.max(1, (parseInt(input.value || "1", 10) || 1) - 1));
-    });
-    // Quita el toast propio; el módulo del carrito ya muestra uno.
-  }
+    qs("[data-qty-incr]")?.addEventListener("click", ()=>{ input.value = String(Math.min(99,(+input.value||1)+1)); });
+    qs("[data-qty-decr]")?.addEventListener("click", ()=>{ input.value = String(Math.max(1,(+input.value||1)-1)); });
 
-  // -------- init
-  document.addEventListener("DOMContentLoaded", () => {
-    let prod = null;
-    if (slugParam && platParam) prod = findBySlugPlat(slugParam, platParam);
-    if (!prod && slugParam)     prod = findBySlug(slugParam);
-
-    if (!prod) {
-      qs("main .container")?.insertAdjacentHTML(
-        "beforeend",
-        `<div class="alert alert-warning mt-4">Producto no encontrado.</div>`
-      );
-      document.title = "Producto no encontrado | Tienda";
-      return;
-    }
-
-    // Render UI
-    renderProduct(prod);
-    bindQtyCart();
-
-    // --- VISTO actual
-    const href  = location.pathname + location.search;
-    const title = qs("[data-title]")?.textContent?.trim() || "Producto";
-    const img   = qs("[data-image], [data-prod-image] img")?.src || "";
-    addVisto({ href, title, img });
-
-    // --- VISTOS: clic en relacionados
-    qs("[data-related-track]")?.addEventListener("click", (e) => {
-      const a = e.target.closest("a[href]");
-      if (!a) return;
-      const card = a.closest(".card, .rel-item") || a;
-      const title = card.querySelector(".small.fw-semibold, h3, .title")?.textContent?.trim() || a.title || "Producto";
-      const img   = card.querySelector("img")?.src || "";
-      addVisto({ href: a.getAttribute("href"), title, img });
-    });
-
-    // --- CARRITO: preparar data-* del botón con los datos reales
     const btnAdd = qs("[data-add-cart]");
-    const qtyInp = qs("[data-qty]");
-    if (btnAdd) {
+    if (btnAdd){
+      const img = qs("[data-image]")?.src || imgFrom(prod);
       btnAdd.dataset.id    = prod.slug || slugify(prod.titulo || prod.nombre || "producto");
       btnAdd.dataset.title = prod.titulo || prod.nombre || "Producto";
       btnAdd.dataset.price = String(prod.precio || prod.price || 0);
-      btnAdd.dataset.img   = img || ""; // ya calculado arriba
-      btnAdd.dataset.plataforma = String(prod.plataforma || "").toLowerCase();
-
-      // Propagar cantidad al vuelo antes de que bindAddToCart lo lea
-      btnAdd.addEventListener("click", () => {
-        const q = Math.max(1, parseInt(qtyInp?.value || "1", 10));
+      btnAdd.dataset.img   = img;
+      btnAdd.dataset.plataforma = String(prod.plataforma||"").toLowerCase();
+      btnAdd.addEventListener("click", ()=>{
+        const q = Math.max(1, parseInt(input?.value || "1", 10));
         btnAdd.dataset.qty = String(q);
       });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const sp    = new URLSearchParams(location.search);
+      const qSlug = slugify(sp.get("slug") || "");
+      const qPlat = (sp.get("plataforma") || "").trim().toLowerCase();
+
+      const CATALOGO = await cargarCatalogo();
+
+      let prod = CATALOGO.find(p =>
+        slugify(p.slug || p.titulo || p.nombre || "") === qSlug &&
+        String(p.plataforma||"").toLowerCase() === qPlat
+      ) || CATALOGO.find(p =>
+        slugify(p.slug || p.titulo || p.nombre || "") === qSlug
+      );
+
+      if (!prod){
+        qs("main .container")?.insertAdjacentHTML(
+          "beforeend",
+          `<div class="alert alert-warning mt-4">Producto no encontrado.</div>`
+        );
+        document.title = "Producto no encontrado | Tienda";
+        return;
+      }
+
+      renderProduct(prod, CATALOGO);
+      bindQtyCart(prod);
+
+      // Vistos: actual (sin duplicar)
+      const href  = location.pathname + location.search;
+      const title = qs("[data-title]")?.textContent?.trim() || prod.titulo || prod.nombre || "Producto";
+      const img   = qs("[data-image]")?.src || imgFrom(prod);
+      saveVisto({ href, title, img });
+
+      // Vistos: clic en relacionados (sin duplicar y con URL canónica)
+      qs("[data-related-track]")?.addEventListener("click", (e)=>{
+        const a    = e.target.closest("a[href]");
+        if (!a) return;
+        const card = a.closest(".card, .rel-item") || a;
+        const t    = card.querySelector(".small.fw-semibold, h3, .title")?.textContent?.trim() || a.title || "Producto";
+        const im   = card.querySelector("img")?.src || "";
+        const u    = new URL(a.href);
+        const href = u.pathname + u.search;
+        saveVisto({ href, title: t, img: im });
+      });
+
+    } catch (err) {
+      console.error(err);
+      qs("main .container")?.insertAdjacentHTML(
+        "beforeend",
+        `<div class="alert alert-danger mt-4">No se pudo cargar el catálogo.</div>`
+      );
     }
   });
 })();

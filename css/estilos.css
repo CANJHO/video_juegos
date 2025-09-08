@@ -212,6 +212,33 @@
 .recent-date { font-size: .85rem; color: #6c757d; }
 
 
+/* ====== ´RODUCTO ESTILO LETRAS DE LINK ====== */
+
+/* Breadcrumb en MAYÚSCULAS y con mejor look */
+.breadcrumb-caps {
+  text-transform: uppercase;      /* <- todo en mayúsculas */
+  letter-spacing: .05em;          /* leve espaciado */
+  font-weight: 600;               /* un poco más marcado */
+  --bs-breadcrumb-divider: "/";   /* separador de Bootstrap */
+}
+
+.breadcrumb-caps .breadcrumb-item + .breadcrumb-item::before {
+  color: #b5b8bd;                 /* color del separador */
+  padding: 0 .5rem;               /* espacio alrededor del "/" */
+}
+
+.breadcrumb-caps .breadcrumb-item,
+.breadcrumb-caps .breadcrumb-item a {
+  color: #6c757d;                 /* tono gris elegante */
+  text-decoration: none;
+}
+
+.breadcrumb-caps .breadcrumb-item a:hover {
+  text-decoration: underline;     /* feedback al pasar el mouse */
+}
+
+
+
 /* ====== FOOTER ====== */
 .site-footer{
   background:var(--top-bg); 
