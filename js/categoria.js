@@ -1,5 +1,5 @@
 // /js/categoria.js
-import { getVistos, setVistos, getPause, setPause } from "./lib/vistos.js";
+import { getVistos, setVistos } from "./lib/vistos.js";
 
 import { bindCartFrame, bindAddToCart, renderBadge } from "./lib/cart.js";
 
