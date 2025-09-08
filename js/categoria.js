@@ -1,6 +1,5 @@
 // /js/categoria.js
-import { getVistos, setVistos } from "./lib/vistos.js";
-
+import { addVisto, getVistos, setVistos, getPause, setPause } from "./lib/vistos.js";
 import { bindCartFrame, bindAddToCart, renderBadge } from "./lib/cart.js";
 
 /* ---------- utilidades ---------- */
@@ -65,11 +64,22 @@ function renderGrid(items){
   grid.innerHTML = items.map(card).join("");
 }
 
-
 /* ---------- vistos recientemente ---------- */
 function renderRecientes(){
   const cont = $("[data-recent-list]");
   if (!cont) return;
+
+  // reconstruir imagen si un registro antiguo no la tiene
+  const imgFromHref = (href) => {
+    try {
+      const u = new URL(href, location.origin);
+      const sp = new URLSearchParams(u.search);
+      const plat = (sp.get("plataforma") || "").toLowerCase();
+      const slug = sp.get("slug") || "";
+      return (plat && slug) ? `${ROOT}/imagenes/index/${plat}/${slug}.webp` : "";
+    } catch { return ""; }
+  };
+
   const vistos = getVistos();
   if (!vistos.length){
     cont.className = "recent-grid";
@@ -77,24 +87,27 @@ function renderRecientes(){
     updateRecButtons();
     return;
   }
+
   cont.className = "recent-grid";
   cont.innerHTML = vistos.map(v=>`
     <a href="${v.href}" class="text-decoration-none">
       <div class="recent-card">
-        <img src="${v.img}" alt="${v.title}">
+        <img src="${(v.img && v.img.trim()) ? v.img : imgFromHref(v.href)}" alt="${v.title}">
         <div>
           <div class="recent-title">${v.title}</div>
           <div class="recent-date">${new Date(v.ts).toLocaleDateString()}</div>
         </div>
       </div>
     </a>`).join("");
+
   updateRecButtons();
 }
+
 function updateRecButtons(){
   $("#recClear")?.addEventListener("click", ()=>{ setVistos([]); renderRecientes(); });
-  const paused = getPause();
   const btn = $("#recToggle");
   if (btn){
+    const paused = getPause();
     btn.textContent = paused ? "Reanudar" : "Pausar";
     btn.onclick = ()=>{ setPause(!getPause()); updateRecButtons(); };
   }
@@ -112,21 +125,24 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     const items = data.filter(p => String(p.plataforma).toLowerCase() === PLATFORM);
     renderGrid(items);
 
-    // eventos para “vistos” (al navegar a producto)
+    // pintar la lista de vistos al cargar
+    renderRecientes();
+
+    // eventos para “vistos” (al navegar a producto) – URL canónica
     $("[data-grid]")?.addEventListener("click", (e)=>{
       const a = e.target.closest("a[href]");
       if (!a) return;
       const card = a.closest(".card");
       const img  = card?.querySelector("img");
-      addVisto({ href:a.getAttribute("href"),
-                 title: card?.querySelector("h3")?.textContent?.trim() || img?.alt || "Producto",
-                 img: img?.src || "" });
+      const t    = card?.querySelector("h3")?.textContent?.trim() || img?.alt || "Producto";
+      const u    = new URL(a.href, location.origin);
+      addVisto({ href: u.pathname + u.search, title: t, img: img?.src || "" });
     });
 
     // carrito (badge/drawer + botones añadir)
-    bindCartFrame();           // pinta el badge y arma el drawer
-    bindAddToCart();           // escucha los botones [data-add-cart]
-    renderBadge();             // asegura el número al cargar
+    bindCartFrame();
+    bindAddToCart();
+    renderBadge();
 
   }catch(err){
     console.error(err);
