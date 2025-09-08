@@ -120,6 +120,9 @@ function updateRecButtons(){
   if (btnToggle){ const paused = getPause(); btnToggle.textContent = paused?"Reanudar":"Pausar"; btnToggle.onclick = ()=>{ setPause(!getPause()); updateRecButtons(); }; }
 }
 
+// 👇 AÑADIDO: asegura que también se pinte cuando el DOM ya está listo (si index.js carga en <head>)
+document.addEventListener("DOMContentLoaded", renderRecientes);
+
 /* =========================== BUSCADOR (redirige a tienda) =========================== */
 (function setupSearch() {
   const form = document.querySelector(".search-wrap");
@@ -136,7 +139,7 @@ function updateRecButtons(){
     const base = location.pathname.includes("/paginas/") ? ".." : ".";
     const q = (input.value || "").trim();
     const url = `${base}/paginas/tienda.html${q ? `?q=${encodeURIComponent(q)}` : ""}`;
-    form.reset();                // <-- limpia el campo antes de navegar
+    form.reset();                // limpia el campo antes de navegar
     location.href = url;
   });
 
