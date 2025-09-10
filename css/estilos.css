@@ -304,4 +304,83 @@
   .footer-logo{ height:60px; }
 }
 
+/*==================MEDIOS DE PAGO==================*/
+.payment-acc .acc-btn{
+  width:100%;
+  text-align:left;
+  background:#f7f7f7;
+  border:1px solid #ff6b57;
+  border-left:0;border-right:0;
+  padding:12px 16px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+.payment-acc .acc-btn + .collapse { border:1px solid #eee; border-top:0; }
+.payment-acc .acc-btn:focus{ outline:none; box-shadow:none; }
+.payment-acc .acc-btn::after{
+  content:"\f077"; /* fa-chevron-up */
+  font-family:"Font Awesome 6 Free"; font-weight:900;
+  float:right; transition:transform .2s ease;
+}
+.payment-acc .acc-btn.collapsed::after{
+  content:"\f078"; /* fa-chevron-down */
+  transform:none;
+}
+.payment-acc .acc-body{ background:#fff; padding:18px 20px; }
+.payment-acc .bank-logo{ height:38px; vertical-align:middle; }
+.payment-acc .badge-agent{
+  display:inline-block; padding:.15rem .5rem; font-size:.8rem;
+  border-radius:.4rem; background:#21a366; color:#fff; font-weight:700;
+}
+.hr-dashed{ border-top:2px dashed #bdbdbd; opacity:1; margin:18px 0; }
+
+/*================== PREGUNTAS FRECUENTES ==================*/
+.faq-acc .acc-btn{
+  width:100%;
+  text-align:left;
+  background:#f7f7f7;
+  border:1px solid #ff6b57;
+  border-left:0;border-right:0;
+  padding:12px 16px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+.faq-acc .acc-btn + .collapse { border:1px solid #eee; border-top:0; }
+.faq-acc .acc-btn:focus{ outline:none; box-shadow:none; }
+.faq-acc .acc-btn::after{
+  content:"\f077"; /* fa-chevron-up */
+  font-family:"Font Awesome 6 Free"; font-weight:900;
+  float:right; transition:transform .2s ease;
+}
+.faq-acc .acc-btn.collapsed::after{
+  content:"\f078"; /* fa-chevron-down */
+  transform:none;
+}
+.faq-acc .acc-body{ background:#fff; padding:18px 20px; }
+
+/*==================TERMINOS Y CONDICIONES==================*/
+.legal-acc .acc-btn{
+  width:100%;
+  text-align:left;
+  background:#f7f7f7;
+  border:1px solid #ff6b57;
+  border-left:0;border-right:0;
+  padding:12px 16px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+.legal-acc .acc-btn + .collapse { border:1px solid #eee; border-top:0; }
+.legal-acc .acc-btn:focus{ outline:none; box-shadow:none; }
+.legal-acc .acc-btn::after{
+  content:"\f077"; /* fa-chevron-up */
+  font-family:"Font Awesome 6 Free"; font-weight:900;
+  float:right; transition:transform .2s ease;
+}
+.legal-acc .acc-btn.collapsed::after{
+  content:"\f078"; /* fa-chevron-down */
+}
+.legal-acc .acc-body{ background:#fff; padding:18px 20px; }
 
