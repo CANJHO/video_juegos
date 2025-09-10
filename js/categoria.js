@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   try{
     // título
     const name = PLATFORM.toUpperCase();
-    const titleEl = $("[data-title]"); if (titleEl) titleEl.textContent = `Juegos ${name}`;
+    const titleEl = $("[data-title]"); if (titleEl) titleEl.textContent = `JUEDOS DE ${name}`;
 
     // catálogo + render
     const data = await loadCatalog();
