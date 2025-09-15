@@ -4,8 +4,8 @@
 /* ======================== STORAGE ======================== */
 const CART_KEY = "cart:v1"; // donde se guarda el carrito
 
-const $ = (s, r = document) => r.querySelector(s);
-const fmt = (n) => new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(+n || 0);
+const seleccionarElemento = (seletor, raiz = document) => raiz.querySelector(seletor);
+const formatearMoneda = (n) => new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(+n || 0);
 
 export function getCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
@@ -94,7 +94,7 @@ export function closeDrawer() {
 }
 
 export function renderDrawer() {
-  const pane = $("#cartDrawer");
+  const pane = seleccionarElemento("#cartDrawer");
   if (!pane) return;
 
   const list = pane.querySelector("[data-cart-list]");
@@ -107,7 +107,7 @@ export function renderDrawer() {
   if (!cart.length) {
     empty?.classList.remove("d-none");
     full?.classList.add("d-none");
-    if (subtotalEl) subtotalEl.textContent = fmt(0);
+    if (subtotalEl) subtotalEl.textContent = formatearMoneda(0);
     if (list) list.innerHTML = "";
     return;
   }
@@ -124,7 +124,7 @@ export function renderDrawer() {
              class="rounded" style="width:56px;height:56px;object-fit:cover">
         <div class="flex-grow-1">
           <div class="fw-semibold small">${it.title || ""}</div>
-          <div class="text-muted small">${it.qty} × ${fmt(it.price)}</div>
+          <div class="text-muted small">${it.qty} × ${formatearMoneda(it.price)}</div>
         </div>
         <div class="btn-group btn-group-sm">
           <button class="btn btn-outline-secondary" data-dec="${i}">−</button>
@@ -145,7 +145,7 @@ export function renderDrawer() {
     };
   }
 
-  if (subtotalEl) subtotalEl.textContent = fmt(getSubtotal());
+  if (subtotalEl) subtotalEl.textContent = formatearMoneda(getSubtotal());
 }
 
 /* ======================== BINDINGS ======================== */
@@ -174,9 +174,9 @@ export function bindAddToCart() {
 
 // Enlaza el botón del carrito y el overlay; pinta UI inicial
 export function bindCartFrame() {
-  $("#cartOpen")?.addEventListener("click", (e) => { e.preventDefault(); openDrawer(); });
-  $("#cartClose")?.addEventListener("click", (e) => { e.preventDefault(); closeDrawer(); });
-  $("#cartOverlay")?.addEventListener("click", () => closeDrawer());
+  seleccionarElemento("#cartOpen")?.addEventListener("click", (e) => { e.preventDefault(); openDrawer(); });
+  seleccionarElemento("#cartClose")?.addEventListener("click", (e) => { e.preventDefault(); closeDrawer(); });
+  seleccionarElemento("#cartOverlay")?.addEventListener("click", () => closeDrawer());
 
   // Pintado inicial
   syncCartBadge();

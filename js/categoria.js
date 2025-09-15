@@ -3,15 +3,15 @@ import { addVisto, getVistos, setVistos, getPause, setPause } from "./lib/vistos
 import { bindCartFrame, bindAddToCart, renderBadge } from "./lib/cart.js";
 
 /* ---------- utilidades ---------- */
-const $ = (s, r=document) => r.querySelector(s);
-const money = (n=0)=> new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"}).format(+n||0);
+const seleccionarElemento = (selector, raiz=document) => raiz.querySelector(selector);
+const formatearMoneda = (n=0) => new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN"}).format(+n||0);
 
 // Detecta si estamos dentro de /paginas/
 const ROOT = location.pathname.includes("/paginas/") ? ".." : ".";
 
 // Deducción de plataforma: por dataset o por nombre de archivo (ps4.html -> "ps4")
 const PLATFORM =
-  ($("[data-grid]")?.dataset.plataforma ||
+  (seleccionarElemento("[data-grid]")?.dataset.plataforma ||
    location.pathname.split("/").pop().replace(".html","")).toLowerCase();
 
 /* ---------- catálogo ---------- */
@@ -44,7 +44,7 @@ function card(p){
         <h3 class="h6 mb-1">
           <a href="${hrefProducto(p)}" class="text-decoration-none">${p.titulo}</a>
         </h3>
-        <div class="fw-semibold">${money(p.precio || 0)}</div>
+        <div class="fw-semibold">${formatearMoneda(p.precio || 0)}</div>
         <button class="btn btn-sm btn-success"
                 data-add-cart
                 data-id="${p.slug}"
@@ -60,13 +60,13 @@ function card(p){
 }
 
 function renderGrid(items){
-  const grid = $("[data-grid]");
+  const grid = seleccionarElemento("[data-grid]");
   grid.innerHTML = items.map(card).join("");
 }
 
 /* ---------- vistos recientemente ---------- */
 function renderRecientes(){
-  const cont = $("[data-recent-list]");
+  const cont = seleccionarElemento("[data-recent-list]");
   if (!cont) return;
 
   // reconstruir imagen si un registro antiguo no la tiene
@@ -104,8 +104,8 @@ function renderRecientes(){
 }
 
 function updateRecButtons(){
-  $("#recClear")?.addEventListener("click", ()=>{ setVistos([]); renderRecientes(); });
-  const btn = $("#recToggle");
+  seleccionarElemento("#recClear")?.addEventListener("click", ()=>{ setVistos([]); renderRecientes(); });
+  const btn = seleccionarElemento("#recToggle");
   if (btn){
     const paused = getPause();
     btn.textContent = paused ? "Reanudar" : "Pausar";
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   try{
     // título
     const name = PLATFORM.toUpperCase();
-    const titleEl = $("[data-title]"); if (titleEl) titleEl.textContent = `JUEDOS DE ${name}`;
+    const titleEl = seleccionarElemento("[data-title]"); if (titleEl) titleEl.textContent = `JUEDOS DE ${name}`;
 
     // catálogo + render
     const data = await loadCatalog();
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     renderRecientes();
 
     // eventos para “vistos” (al navegar a producto) – URL canónica
-    $("[data-grid]")?.addEventListener("click", (e)=>{
+    seleccionarElemento("[data-grid]")?.addEventListener("click", (e)=>{
       const a = e.target.closest("a[href]");
       if (!a) return;
       const card = a.closest(".card");
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   }catch(err){
     console.error(err);
-    $("[data-grid]")?.insertAdjacentHTML("beforebegin",
+    seleccionarElemento("[data-grid]")?.insertAdjacentHTML("beforebegin",
       `<div class="alert alert-danger">No se pudo cargar el catálogo.</div>`);
   }
 });

@@ -239,17 +239,6 @@
 
 
     <!-- Carrito frame -->
-    <script type="module">
-        import { bindAddToCart, bindCartFrame, syncCartBadge, onCartChanged } from "../js/lib/cart.js";
-        bindCartFrame();
-        bindAddToCart();
-        syncCartBadge();
-        onCartChanged(syncCartBadge);
-        window.addEventListener("storage", (e) => {
-            if (e.key === "cart:v1" || e.key === "cartCount") syncCartBadge();
-        });
-    </script>
-
     <!-- WhatsApp -->
     <a href="https://wa.me/51999999999?text=Hola,%20quiero%20información%20sobre%20un%20juego" class="whatsapp-float"
         target="_blank" rel="noopener" aria-label="Abrir WhatsApp">
@@ -258,7 +247,9 @@
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Lógica de tienda -->
-    <script type="module" src="../js/tienda.js"></script>
+    <script type="module" src="../js/tienda.js" defer></script>
+  <script type="module" defer src="../js/init/inicializador-carrito.js" defer></script>
+  <script type="module" defer src="../js/tienda.js" defer></script>
 </body>
 
 </html>

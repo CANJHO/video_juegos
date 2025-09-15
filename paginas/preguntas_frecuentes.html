@@ -431,17 +431,7 @@
       </div>
     </aside>
   </section>
-  <script type="module">
-        import { bindAddToCart, bindCartFrame, syncCartBadge, onCartChanged } from "../js/lib/cart.js";
-        bindCartFrame();
-        bindAddToCart();
-        syncCartBadge();                       // pinta al cargar
-        onCartChanged(syncCartBadge);          // repinta cuando cambie el carrito
-        window.addEventListener("storage", (e) => { // cambios desde otra pestaña
-          if (e.key === "cart:v1" || e.key === "cartCount") syncCartBadge();
-        });
-</script>
-    <!-- WhatsApp -->
+  <!-- WhatsApp -->
   <a href="https://wa.me/51999999999?text=Hola,%20quiero%20información%20sobre%20un%20juego" class="whatsapp-float"
     target="_blank" rel="noopener" aria-label="Abrir WhatsApp">
     <i class="fab fa-whatsapp"></i>
@@ -450,9 +440,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Módulo reutilizable de categorías -->
-  <script type="module" src="../js/categoria.js"></script>
-  <script type="module" src="../js/lib/search-router.js"></script>
+  <script type="module" src="../js/categoria.js" defer></script>
+  <script type="module" src="../js/lib/search-router.js" defer></script>
 
   
+  <script type="module" defer src="../js/init/inicializador-carrito.js" defer></script>
 </body>
 </html>
