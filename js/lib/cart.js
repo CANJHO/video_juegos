@@ -1,5 +1,4 @@
-// /js/lib/cart.js  — Reemplazo total
-// Carrito simple con persistencia en localStorage y badge sincronizado
+// /js/lib/cart.js  
 
 /* ======================== STORAGE ======================== */
 const CART_KEY = "cart:v1"; // donde se guarda el carrito
