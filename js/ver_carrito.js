@@ -43,45 +43,57 @@ function enPagina(selector) {
 
 /* =================== RENDER LISTA =================== */
 function plantillaItem(item) {
-  const imagen = item.img || "";         // ya viene guardada por tu app
+  const imagen = item.img || "";
   const titulo = item.title || "Producto";
   const precio = Number(item.price) || 0;
   const cantidad = Number(item.qty) || 1;
   const id = item.id || item.slug || titulo;
 
   return `
-    <div class="row align-items-center gy-2 py-3 border-bottom" data-id="${id}">
-      <div class="col-3 col-md-2">
-        <div class="ratio ratio-3x4">
-          <img src="${imagen}" alt="${titulo}" class="w-100 h-100 object-fit-cover rounded"
-               onerror="this.onerror=null;this.src='../imagenes/placeholder.webp'">
+    <div class="border-top py-3" data-id="${id}">
+      <div class="row align-items-center g-2">
+        <!-- Columna PRODUCTO (imagen + título + quitar) -->
+        <div class="col-12 col-md-6 d-flex align-items-center gap-3">
+          <div class="ratio ratio-1x1" style="width:72px;">
+            <img src="${imagen}" alt="${titulo}" class="w-100 h-100 object-fit-cover rounded"
+                 onerror="this.onerror=null;this.src='../imagenes/placeholder.webp'">
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">${titulo}</div>
+            ${item.plataforma ? `<div class="text-muted small text-uppercase">${item.plataforma}</div>` : ""}
+            <button class="btn btn-sm btn-link text-danger p-0 mt-1" data-accion="eliminar">Quitar</button>
+          </div>
         </div>
-      </div>
 
-      <div class="col-9 col-md-4">
-        <div class="fw-semibold">${titulo}</div>
-        ${item.plataforma ? `<div class="text-muted small text-uppercase">${item.plataforma}</div>` : ""}
-        <button class="btn btn-sm btn-link text-danger p-0 mt-1" data-accion="eliminar">Quitar</button>
-      </div>
+        <!-- Columna PRECIO -->
+        <div class="col-4 col-md-2 text-md-center">
+          <div class="small text-muted d-md-none">Precio</div>
+          <div class="fw-semibold">${formatearMoneda(precio)}</div>
+        </div>
 
-      <div class="col-6 col-md-3 d-flex align-items-center gap-2 mt-2 mt-md-0">
-        <button class="btn btn-sm btn-outline-secondary" data-accion="decrementar">−</button>
-        <input class="form-control form-control-sm text-center" style="max-width:70px"
-               value="${cantidad}" data-cantidad inputmode="numeric" pattern="\\d*">
-        <button class="btn btn-sm btn-outline-secondary" data-accion="incrementar">+</button>
-      </div>
+        <!-- Columna CANTIDAD -->
+        <div class="col-8 col-md-2">
+          <div class="small text-muted d-md-none">Cantidad</div>
+          <div class="d-flex align-items-center justify-content-md-center gap-2">
+            <button class="btn btn-sm btn-outline-secondary" data-accion="decrementar">−</button>
+            <input class="form-control form-control-sm text-center" style="max-width:70px"
+                   value="${cantidad}" data-cantidad inputmode="numeric" pattern="\\d*">
+            <button class="btn btn-sm btn-outline-secondary" data-accion="incrementar">+</button>
+          </div>
+        </div>
 
-      <div class="col-6 col-md-3 text-end">
-        <div class="small text-muted">Precio</div>
-        <div class="fw-semibold">${formatearMoneda(precio)}</div>
-        <div class="small text-muted mt-1">Subtotal</div>
-        <div class="fw-semibold" data-subtotal-item>
-          ${formatearMoneda(precio * cantidad)}
+        <!-- Columna SUBTOTAL -->
+        <div class="col-12 col-md-2 text-md-end">
+          <div class="small text-muted d-md-none">Subtotal</div>
+          <div class="fw-semibold" data-subtotal-item>
+            ${formatearMoneda(precio * cantidad)}
+          </div>
         </div>
       </div>
     </div>
   `;
 }
+
 
 function renderizarLista() {
   const contenedorLista = enPagina("[data-cart-list]");

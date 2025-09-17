@@ -384,3 +384,11 @@
 }
 .legal-acc .acc-body{ background:#fff; padding:18px 20px; }
 
+/*==================CARRITO==================*/
+/* Carrito: cabecera tipo tabla (desktop) */
+@media (min-width: 768px) {
+  .d-md-grid { display: grid !important; }
+}
+
+/* Botón "Finalizar compra" grande */
+.btn.btn-success { font-weight: 700; letter-spacing: .5px; }
